@@ -1,39 +1,42 @@
-import React, { useEffect, useState } from "react";
-import DatePicker from "react-datepicker";
-import Select from "react-select";
-import styled from "styled-components";
+import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import Select from 'react-select';
+import styled from 'styled-components';
 
-import Modal from "../../components/Modal";
-import { Button } from "../../components/Style";
-import { Container, Field } from "../../components/Style";
-import { COUPON, VAR } from "../../constants/const";
+import Modal from '../../components/Modal';
+import { Button } from '../../components/Style';
+import { Container, Field } from '../../components/Style';
+import { COUPON, VAR } from '../../constants/const';
+import { generateCoupon } from '../../middleware/utils';
 
 const couponType = [
-  { value: COUPON.DISCOUNT_AMOUNT, label: "할인(금액)" },
-  { value: COUPON.DISCOUNT_RATE, label: "할인(율)" },
-  { value: COUPON.FREE_SHIIPING, label: "무료 배송" },
-  { value: COUPON.TRIAL_MONTH, label: "무료 구독" },
+  { value: COUPON.DISCOUNT_AMOUNT, label: '할인(금액)' },
+  { value: COUPON.DISCOUNT_RATE, label: '할인(율)' },
+  { value: COUPON.FREE_SHIIPING, label: '무료 배송' },
+  { value: COUPON.TRIAL_MONTH, label: '무료 구독' },
 ];
 
 function CouponCreate({ isOpen, onClose }) {
-  const [type, setType] = useState({ value: "", lable: "" });
+  const [type, setType] = useState({ value: '', lable: '' });
   const [value, setValue] = useState(0);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState(100);
   const [expiredPeriod, setExpiredPeriod] = useState(0);
   const [minPurchase, setMinPurchase] = useState(0);
   const [maxDiscountCost, setMaxDiscountCost] = useState(0);
 
   const checkValidation = () => {
     let valid = false;
-
-    if (type.value === "") {
-      alert("쿠폰 카테고리를 설정해주세요");
+    console.log(amount);
+    if (type.value === '') {
+      alert('쿠폰 카테고리를 설정해주세요');
+    } else if (amount === 0) {
+      alert('쿠폰 수량을 입력해주세요');
     } else if (amount > VAR.MAX_ISSUE_COUNT) {
-      alert("쿠폰은 최대 100,000개 까지 발급 가능합니다.");
+      alert('쿠폰은 최대 100,000개 까지 발급 가능합니다.');
     } else if (isAmountType() && value === 0) {
-      alert("할인 금액(율)을 입력해주세요.");
+      alert('할인 금액(율)을 입력해주세요.');
     } else {
       valid = true;
     }
@@ -42,11 +45,11 @@ function CouponCreate({ isOpen, onClose }) {
   };
 
   const clearState = () => {
-    setType({ value: "", lable: "" });
+    setType({ value: '', lable: '' });
     setStartDate(new Date());
     setEndDate(new Date());
     setValue(0);
-    setAmount(0);
+    setAmount(100);
     setExpiredPeriod(0);
     setMinPurchase(0);
     setMaxDiscountCost(0);
@@ -55,7 +58,7 @@ function CouponCreate({ isOpen, onClose }) {
   const onOk = () => {
     if (!checkValidation()) return;
 
-    if (window.confirm("쿠폰을 생성하시겠습니까?")) {
+    if (window.confirm('쿠폰을 생성하시겠습니까?')) {
       const params = {
         value,
         startDate,
@@ -66,12 +69,21 @@ function CouponCreate({ isOpen, onClose }) {
         maxDiscountCost,
         type: type.value,
       };
+      
+      let tempCoupon = [];
+
+      for (let i = 0; i < Number(params.amount); i++) {
+        const coupon = generateCoupon();
+        tempCoupon.push(coupon);
+      }
+
+      console.log(tempCoupon);
     }
 
-    // 쿠폰 생성
+    // 쿠폰 생성 (서버가 없어 콘솔로 생성된 쿠폰번호를 나열합니다.)
 
     clearState();
-    // onClose();
+    onClose();
   };
 
   const isAmountType = () =>
@@ -89,18 +101,15 @@ function CouponCreate({ isOpen, onClose }) {
       title="쿠폰 생성"
       isOpen={isOpen}
       onClose={onClose}
-      actions={[
-        <Button onClick={onClose}>취소</Button>,
-        <Button onClick={onOk}>생성</Button>,
-      ]}
+      actions={[<Button onClick={onClose}>취소</Button>, <Button onClick={onOk}>생성</Button>]}
     >
       <Container>
-        <Field cols={2} width={["100px", "auto"]}>
+        <Field cols={2} width={['100px', 'auto']}>
           <span>쿠폰타입</span>
           <Select options={couponType} onChange={setType} />
         </Field>
 
-        <Field cols={2} width={["100px", "auto"]}>
+        <Field cols={2} width={['100px', 'auto']}>
           <span>할인(금액 / %)</span>
           <Input
             type="text"
@@ -110,56 +119,54 @@ function CouponCreate({ isOpen, onClose }) {
           ></Input>
         </Field>
 
-        <Field cols={2} width={["100px", "auto"]}>
+        <Field cols={2} width={['100px', 'auto']}>
           <span>쿠폰시작일</span>
           <DatePicker
-            locale="ko"
             onChange={setStartDate}
             selected={startDate}
             minDate={new Date()}
             popperModifiers={{ preventOverflow: { enabled: true } }}
           />
         </Field>
-        <Field cols={2} width={["100px", "auto"]}>
+        <Field cols={2} width={['100px', 'auto']}>
           <span>쿠폰종료일</span>
           <DatePicker
-            locale="ko"
             onChange={setEndDate}
             selected={endDate}
             minDate={new Date()}
             popperModifiers={{ preventOverflow: { enabled: true } }}
           />
         </Field>
-        <Field cols={2} width={["100px", "auto"]}>
+        <Field cols={2} width={['100px', 'auto']}>
           <span>쿠폰 발행 수</span>
           <Input
             type="text"
-            onChange={setAmount}
+            onChange={(e) => setAmount(e.target.value)}
             max="100000"
             placeholder="1회 최대 발급쿠폰 수: 100,000 개"
           ></Input>
         </Field>
-        <Field cols={2} width={["100px", "auto"]}>
+        <Field cols={2} width={['100px', 'auto']}>
           <span>유효기한</span>
           <Input
             type="text"
-            onChange={setExpiredPeriod}
+            onChange={(e) => setExpiredPeriod(e.target.value)}
             placeholder="쿠폰 발행후 유효기간 (기본값: 무제한)"
           ></Input>
         </Field>
-        <Field cols={2} width={["100px", "auto"]}>
+        <Field cols={2} width={['100px', 'auto']}>
           <span>최소 구매금액</span>
           <Input
             type="text"
-            onChange={setMinPurchase}
+            onChange={(e) => setMinPurchase(e.target.value)}
             placeholder="쿠폰 적용가능한 구매 최소금액 (기본값: 최소금액없음)"
           ></Input>
         </Field>
-        <Field cols={2} width={["100px", "auto"]}>
+        <Field cols={2} width={['100px', 'auto']}>
           <span>최대 할인액</span>
           <Input
             type="text"
-            onChange={setMaxDiscountCost}
+            onChange={(e) => setMaxDiscountCost(e.target.value)}
             placeholder="할인 가능한 최대금액 (기본값: 제한없음)"
           ></Input>
         </Field>
@@ -178,7 +185,7 @@ const Input = styled.input`
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
   text-align: left;
   line-height: 1.21428571em;
-  font-family: Lato, "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-family: Lato, 'Helvetica Neue', Arial, Helvetica, sans-serif;
   padding: 0.67857143em 1em;
   background: #fff;
   border: 1px solid rgba(34, 36, 38, 0.15);
@@ -187,8 +194,7 @@ const Input = styled.input`
   -webkit-transition: border-color 0.1s ease, -webkit-box-shadow 0.1s ease;
   transition: border-color 0.1s ease, -webkit-box-shadow 0.1s ease;
   transition: box-shadow 0.1s ease, border-color 0.1s ease;
-  transition: box-shadow 0.1s ease, border-color 0.1s ease,
-    -webkit-box-shadow 0.1s ease;
+  transition: box-shadow 0.1s ease, border-color 0.1s ease, -webkit-box-shadow 0.1s ease;
   -webkit-box-shadow: none;
   box-shadow: none;
 `;

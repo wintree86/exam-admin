@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import { Button } from "../Style";
 
 function Modal({ title, isOpen, children, actions }) {
   return (
