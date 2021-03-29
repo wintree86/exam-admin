@@ -20,7 +20,7 @@ function CouponCreate({ isOpen, onClose }) {
   const [value, setValue] = useState(0);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(0);
   const [expiredPeriod, setExpiredPeriod] = useState(0);
   const [minPurchase, setMinPurchase] = useState(0);
   const [maxDiscountCost, setMaxDiscountCost] = useState(0);
@@ -41,9 +41,21 @@ function CouponCreate({ isOpen, onClose }) {
     return valid;
   };
 
+  const clearState = () => {
+    setType({ value: "", lable: "" });
+    setStartDate(new Date());
+    setEndDate(new Date());
+    setValue(0);
+    setAmount(0);
+    setExpiredPeriod(0);
+    setMinPurchase(0);
+    setMaxDiscountCost(0);
+  };
+
   const onOk = () => {
-    if (checkValidation()) {
-      window.confirm("쿠폰을 생성하시겠습니까?")
+    if (!checkValidation()) return;
+
+    if (window.confirm("쿠폰을 생성하시겠습니까?")) {
       const params = {
         value,
         startDate,
@@ -58,6 +70,7 @@ function CouponCreate({ isOpen, onClose }) {
 
     // 쿠폰 생성
 
+    clearState();
     // onClose();
   };
 
